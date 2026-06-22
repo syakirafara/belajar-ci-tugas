@@ -18,4 +18,8 @@ class Home extends BaseController
 
         return view('v_home', $data);
     }
+    public function faq(): string
+    {
+        return view('v_faq');
+    }
 }
