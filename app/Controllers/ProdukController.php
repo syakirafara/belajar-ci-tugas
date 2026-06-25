@@ -9,6 +9,9 @@ use Dompdf\Dompdf;
 
 class ProdukController extends BaseController
 {
+    protected $model;
+    private $token;
+    
     protected $productModel;
 
     function __construct()
@@ -111,5 +114,28 @@ class ProdukController extends BaseController
         $dompdf->stream($filename, [
             'Attachment' => true
         ]);
+    }
+
+    private function authenticate()
+    {
+        $header = $this->request->getHeaderLine('Authorization');
+
+        if (empty($header)) {
+            return false;
+        }
+
+        if (!preg_match('/Bearer\s+(.*)$/i', $header, $matches)) {
+            return false;
+        }
+
+        return $matches[1] === $this->token;
+    }
+
+    private function unauthorized()
+    {
+        return $this->respond([
+            'status' => false,
+            'message' => 'Unauthorized'
+        ], 401);
     }
 }
