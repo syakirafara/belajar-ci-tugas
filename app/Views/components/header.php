@@ -16,6 +16,16 @@
       </form>
     </div><!-- End Search Bar -->
 
+    <!-- ======= Diskon Badge ======= -->
+    <?php if (diskon_hari_ini() > 0) : ?>
+      <div class="d-flex align-items-center ms-3">
+        <span class="badge bg-success p-2">
+          Hari ini ada diskon IDR <?= number_format(diskon_hari_ini(), 0, ',', '.') ?> per item
+        </span>
+      </div>
+    <?php endif; ?>
+    <!-- End Diskon Badge -->
+
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 

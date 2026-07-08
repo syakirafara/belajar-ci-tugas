@@ -37,5 +37,22 @@ $routes->get('history', 'TransaksiController::history', ['filter' => 'auth']);
 $routes->get('ajax/destinations','TransaksiController::destinations', ['filter' => 'auth']);
 $routes->get('ajax/costs','TransaksiController::costs', ['filter' => 'auth']);
 
+// ================= DISKON (khusus admin) =================
+$routes->group('diskon', ['filter' => 'admin'], function ($routes) {
+    $routes->get('', 'DiscountController::index');
+    $routes->post('', 'DiscountController::create');
+    $routes->post('update/(:num)', 'DiscountController::update/$1');
+    $routes->get('delete/(:num)', 'DiscountController::delete/$1');
+});
+
+// ============ PEMBELIAN / MANAJEMEN TRANSAKSI (khusus admin) ============
+$routes->group('pembelian', ['filter' => 'admin'], function ($routes) {
+    $routes->get('', 'PembelianController::index');
+    $routes->get('status/(:num)', 'PembelianController::status/$1');
+});
+
 $routes->resource('api/products', ['controller' => 'Api\ProdukController']);
 $routes->get('api/transactions', 'Api\TransaksiController::index');
+
+// ================= WEBSERVICE DISKON =================
+$routes->resource('api/discounts', ['controller' => 'Api\DiscountController']);

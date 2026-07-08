@@ -24,7 +24,17 @@ if (session()->getFlashData('success')) {
             <div class="card">
                 <div class="card-body">
                     <img src="<?= base_url() . "img/" . $item['foto'] ?>" alt="..." width="50%">
-                    <h5 class="card-title"><?= $item['nama'] ?><br><?= $item['harga'] ?><?php echo number_to_currency($item['harga'], 'IDR') ?></h5>
+                    <h5 class="card-title">
+                        <?= $item['nama'] ?><br>
+                        <?php if (diskon_hari_ini() > 0) : ?>
+                            <span class="text-danger text-decoration-line-through">
+                                <?= number_to_currency($item['harga'], 'IDR') ?>
+                            </span>
+                            <?= number_to_currency(harga_diskon($item['harga']), 'IDR') ?>
+                        <?php else : ?>
+                            <?= number_to_currency($item['harga'], 'IDR') ?>
+                        <?php endif; ?>
+                    </h5>
                     <button type="submit" class="btn btn-info rounded-pill">Beli</button>
                 </div>
             </div>

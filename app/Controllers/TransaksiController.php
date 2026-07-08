@@ -17,19 +17,27 @@ class TransaksiController extends BaseController
 
     public function __construct()
     {
-        helper(['number', 'form']);
+        helper(['number', 'form', 'diskon']);
         $this->cart = service('cart');
         $this->transactionModel = new TransactionModel();
         $this->transactionDetailModel = new TransactionDetailModel();
     }
     public function index()
     {
-        $data = [
-            'items' => $this->cart->contents(),
-            'total' => $this->cart->total()
-        ];
+        $items  = $this->cart->contents();
+        $diskon = diskon_hari_ini();
 
-        return view('v_keranjang', $data);
+        // total dihitung dari harga yang sudah dipotong diskon hari ini
+        $total = 0;
+        foreach ($items as $item) {
+            $total += harga_diskon($item['price']) * $item['qty'];
+        }
+
+        return view('v_keranjang', [
+            'items'  => $items,
+            'diskon' => $diskon,
+            'total'  => $total,
+        ]);
     }
 
     public function cart_add()
@@ -96,12 +104,20 @@ class TransaksiController extends BaseController
     }
     public function checkout()
     {
-        $data = [
-            'items' => $this->cart->contents(),
-            'total' => $this->cart->total()
-        ];
+        $items  = $this->cart->contents();
+        $diskon = diskon_hari_ini();
 
-        return view('v_checkout', $data);
+        // subtotal (belum termasuk ongkir) memakai harga setelah diskon
+        $total = 0;
+        foreach ($items as $item) {
+            $total += harga_diskon($item['price']) * $item['qty'];
+        }
+
+        return view('v_checkout', [
+            'items'  => $items,
+            'diskon' => $diskon,
+            'total'  => $total,
+        ]);
     }
     public function destinations()
     {
@@ -167,9 +183,12 @@ class TransaksiController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+        $diskon = diskon_hari_ini();
+
+        // subtotal memakai harga setelah dipotong diskon yang berlaku hari ini
         $subtotal = 0;
         foreach ($cartItems as $item) {
-            $subtotal += $item['qty'] * $item['price'];
+            $subtotal += harga_diskon($item['price']) * $item['qty'];
         }
 
         $ongkir = (int) $this->request->getPost('ongkir');
@@ -196,8 +215,8 @@ class TransaksiController extends BaseController
                 'transaction_id' => $transactionId,
                 'product_id' => $item['id'],
                 'jumlah' => $item['qty'],
-                'diskon' => 0,
-                'subtotal_harga' => $item['qty'] * $item['price']
+                'diskon' => $diskon, // nominal diskon per item yang berlaku
+                'subtotal_harga' => harga_diskon($item['price']) * $item['qty']
             ]);
         }
 
